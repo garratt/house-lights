@@ -91,7 +91,7 @@ public:
       "scan", 10, std::bind(&Scan2Led::topic_callback, this, _1));
     publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("outcloud", 10);
   
-    serial_port_ = open("/dev/ttyACM0", O_RDWR);
+    serial_port_ = open("/dev/ttyACM1", O_RDWR);
     if(serial_port_ <=  0) {
       printf("Error %i opening serial port: %s\n", errno, strerror(errno));
     }
@@ -106,13 +106,15 @@ private:
     // RCLCPP_INFO(this->get_logger(), "I heard: %lu: %f, %f, %f", msg->ranges.size(), msg->angle_min, msg->angle_max, msg->angle_increment);
 
    // convert range of -1->5 to 1-100
-   if (cloud_out.width && last_y < 5.0 && last_y > -1.0) {
+   if (detections_.size()) {     
+   // if (cloud_out.width && last_y < 5.0 && last_y > -1.0) {
      uint8_t msg[2];
      msg[0]='D';
-     msg[1] = static_cast<uint8_t>((last_y + 1.0) * 16.6);
-     RCLCPP_INFO(this->get_logger(), "last_y: %f  %u", last_y, msg[1]);
+     msg[1] = static_cast<uint8_t>(detections_.size());
+     // RCLCPP_INFO(this->get_logger(), "last_y: %f  %u", last_y, msg[1]);
        if (serial_port_ > 0) {
        write(serial_port_, msg, sizeof(msg));
+       write(serial_port_, detections_.data(), detections_.size());
      }
    }
   }
@@ -140,6 +142,12 @@ private:
      cloud_out.is_dense = false;
   }
 
+  void CheckPoint(float x, float y) {
+   if (y < 5.0 && y > -1.0) {
+     detections_.push_back(static_cast<uint8_t>((y + 1.0) * 16.6));
+    }
+  }
+
   void ProjectLaser(const sensor_msgs::msg::LaserScan & scan_in) {
      for (size_t i = 0; i < n_pts; ++i) {
         ranges(i, 0) = static_cast<double>(scan_in.ranges[i]);
@@ -154,6 +162,7 @@ private:
   cloud_out.data.resize(cloud_out.row_step * cloud_out.height);
 
   unsigned int count = 0;
+  detections_.clear();
   for (size_t i = 100; i < n_pts-130; ++i) {
     // check to see if we want to keep the point
     const float range = scan_in.ranges[i];
@@ -163,6 +172,7 @@ private:
       float x = range * co_sine_map_(i-12, 0);
       float y = range * co_sine_map_(i-12, 1);
       if (x > 8 && x <= 9.5) {
+          CheckPoint(x,y);
           last_y = y;
       // Copy XYZ
       // pstep[0] = static_cast<float>(output(i, 0));
@@ -193,6 +203,7 @@ private:
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_;
   laser_geometry::LaserProjection projector_;
 
+  std::vector<uint8_t> detections_;
   int serial_port_;
   float last_y = 0;
   size_t n_pts = 417;
