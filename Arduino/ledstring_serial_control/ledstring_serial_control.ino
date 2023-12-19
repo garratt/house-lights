@@ -21,9 +21,12 @@ void loop() {
     if (in == 'D') {
       digitalWrite(13, ledstate);
       ledstate = ledstate ? 0 :1;
-      uint8_t detection = Serial.read();
-      if (detection < NUM_LEDS) {
-        detections[detection] = FADE_TIME;
+      uint8_t num_detections = Serial.read();
+      for (int i = 0; i< num_detections; ++i) {
+        uint8_t detection = Serial.read();
+        if (detection < NUM_LEDS) {
+          detections[detection] = FADE_TIME;
+        }
       }
     }
   }
