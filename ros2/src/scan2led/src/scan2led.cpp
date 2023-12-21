@@ -111,7 +111,7 @@ private:
      uint8_t msg[2];
      msg[0]='D';
      msg[1] = static_cast<uint8_t>(detections_.size());
-     // RCLCPP_INFO(this->get_logger(), "last_y: %f  %u", last_y, msg[1]);
+     RCLCPP_INFO(this->get_logger(), "detections: %u  %u", detections_[0], msg[1]);
        if (serial_port_ > 0) {
        write(serial_port_, msg, sizeof(msg));
        write(serial_port_, detections_.data(), detections_.size());
