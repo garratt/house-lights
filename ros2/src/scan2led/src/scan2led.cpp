@@ -91,7 +91,7 @@ public:
       "scan", 10, std::bind(&Scan2Led::topic_callback, this, _1));
     publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("outcloud", 10);
   
-    serial_port_ = open("/dev/ttyACM1", O_RDWR);
+    serial_port_ = open("/dev/arduino2", O_RDWR);
     if(serial_port_ <=  0) {
       printf("Error %i opening serial port: %s\n", errno, strerror(errno));
     }

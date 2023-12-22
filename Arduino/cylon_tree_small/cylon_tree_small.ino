@@ -55,32 +55,15 @@ void display() {
   for (int dot = 0; dot < NUM_LEDS; dot++) {
     leds[dot].setRGB(20, 0, 0);
   }
+  for (int i = 0; i < 2; ++i) {
+    int rand = random(NUM_LEDS);
+    leds[rand].setRGB(180, 180, 180);
+  }
   Cylon(Phase());
-  // SafeSetRGB(cursor, 255, 255, 255);
   FastLED.show();
 }
 
 void loop() {
-  // if (Serial.available() > 0) {
-  //   char c = Serial.read();
-  //   Serial.print(c);
-  //   switch (c) {
-  //     case 'a':
-  //       cursor++;
-  //       break;
-  //     case 'd':
-  //       cursor--;
-  //       break;
-  //     case 'b':
-  //       ToggleEnd(cursor);
-  //       PrintCal();
-  //       break;
-  //   };
-  //   Serial.println(cursor);
-
-  // } else {
-  //   delay(7);
-  // }
   display();
   delay(20);
 }
