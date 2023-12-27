@@ -103,13 +103,15 @@ void loop() {
       has_detections = true;
       digitalWrite(13, ledstate);
       ledstate = ledstate ? 0 :1;
-      while (!Serial.available());
-      uint8_t num_detections = Serial.read();
-      for (int i = 0; i< num_detections; ++i) {
-      while (!Serial.available());
-        uint8_t detection = Serial.read();
-        if (detection < NUM_LEDS) {
-          detections[detection] = FADE_TIME;
+      delay(1);
+      if (Serial.available()) {
+        uint8_t num_detections = Serial.read();
+        for (int i = 0; i< num_detections; ++i) {
+          if(!Serial.available()) break;
+          uint8_t detection = Serial.read();
+          if (detection < NUM_LEDS) {
+            detections[detection] = FADE_TIME;
+          }
         }
       }
     }

@@ -78,8 +78,7 @@ int SetSerialParams(int serial_port) {
 class Scan2Led : public rclcpp::Node
 {
 public:
-  Scan2Led()
-  : Node("scan2led_node")
+  Scan2Led() : Node("scan2led_node")
   {
     // Spherical->Cartesian projection
     for (size_t i = 0; i < n_pts; ++i) {
@@ -90,8 +89,10 @@ public:
     subscription_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
       "scan", 10, std::bind(&Scan2Led::topic_callback, this, _1));
     publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("outcloud", 10);
-  
-    serial_port_ = open("/dev/arduino2", O_RDWR);
+
+
+    this->declare_parameter<std::string>("serial_port", "/dev/arduino2");
+    serial_port_ = open(get_parameter("serial_port").as_string().c_str(), O_RDWR);
     if(serial_port_ <=  0) {
       printf("Error %i opening serial port: %s\n", errno, strerror(errno));
     }
