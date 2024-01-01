@@ -1,0 +1,28 @@
+#!/bin/bash
+
+tree_id="7533432393535191B202"
+lbush_id="553303435343510151A2"
+rbush_id="55330343534351A0F061"
+tracker_id="55330343534351A022E1"
+
+if [ "$1" = "$tree_id" ]; then
+    echo "tree"
+    exit 0
+fi
+
+if [ "$1" = "$lbush_id" ]; then
+    echo "lbush"
+    exit 0
+fi
+
+if [ "$1" = "$rbush_id" ]; then
+    echo "rbush"
+    exit 0
+fi
+
+if [ "$1" = "$tracker_id" ]; then
+    echo "tracker"
+    exit 0
+fi
+
+return 1

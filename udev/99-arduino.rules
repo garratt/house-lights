@@ -1,1 +1,2 @@
+SUBSYSTEM=="tty", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0043", MODE="0666", PROGRAM="/usr/bin/house_light_id %E{ID_SERIAL_SHORT}", SYMLINK+="house_lights/%c", GROUP="plugdev"
 SUBSYSTEM=="tty", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0043", MODE="0666", SYMLINK+="arduino%n", GROUP="plugdev"

@@ -91,7 +91,7 @@ public:
     publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("outcloud", 10);
 
 
-    this->declare_parameter<std::string>("serial_port", "/dev/arduino2");
+    this->declare_parameter<std::string>("serial_port", "/dev/house_lights/tracker");
     serial_port_ = open(get_parameter("serial_port").as_string().c_str(), O_RDWR);
     if(serial_port_ <=  0) {
       printf("Error %i opening serial port: %s\n", errno, strerror(errno));

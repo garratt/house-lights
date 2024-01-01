@@ -1,9 +1,12 @@
 #include <FastLED.h>
-#define NUM_LEDS 100
+#define NUM_LEDS 200
 CRGB leds[NUM_LEDS];
 int cursor  = 0;
 uint8_t flags[NUM_LEDS];
-int prevcal[] = {};
+//int prevcal[] = {};
+#define NUM_LEVELS 7
+ int prevcal[NUM_LEVELS] = {33, 63, 98, 125, 157, 187, NUM_LEDS-1 };
+
 //    int prevcal[] = {25, 48, 66, 88, 103, 118, 131, 143};
     // int prevcal[] = {15, 36, 59, 79, 97, 110, 129, 140};
     // Left side bushes: 53 100 149 197 242 277

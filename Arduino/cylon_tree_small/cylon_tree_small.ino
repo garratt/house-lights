@@ -1,9 +1,13 @@
 #include <FastLED.h>
 #define NUM_LEDS 300
 CRGB leds[NUM_LEDS];
-#define NUM_LEVELS 7
+//#define NUM_LEVELS 8
     // Left side bushes:
- int prevcal[NUM_LEVELS] = {53, 100, 149, 197, 242, 277, NUM_LEDS-1};
+// int prevcal[NUM_LEVELS] = {53, 100, 149, 197, 242, 277, NUM_LEDS-1};
+//int prevcal[NUM_LEVELS] = { 23, 53, 85, 123, 169, 209, 257, NUM_LEDS-1}; //tree
+#define NUM_LEVELS 7
+int prevcal[NUM_LEVELS] = {33, 63, 98, 125, 157, 187, NUM_LEDS-1 }; //Right Bush
+
 
 void setup() {
   FastLED.addLeds<NEOPIXEL, A0>(leds, NUM_LEDS);
