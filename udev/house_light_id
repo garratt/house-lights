@@ -2,6 +2,7 @@
 
 tree_id="7533432393535191B202"
 lbush_id="553303435343510151A2"
+cbush_id="75334323935351210280"
 rbush_id="55330343534351A0F061"
 tracker_id="55330343534351A022E1"
 
@@ -12,6 +13,11 @@ fi
 
 if [ "$1" = "$lbush_id" ]; then
     echo "lbush"
+    exit 0
+fi
+
+if [ "$1" = "$cbush_id" ]; then
+    echo "cbush"
     exit 0
 fi
 

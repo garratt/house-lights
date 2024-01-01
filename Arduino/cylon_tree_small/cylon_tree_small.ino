@@ -11,6 +11,7 @@ int prevcal[NUM_LEVELS] = {33, 63, 98, 125, 157, 187, NUM_LEDS-1 }; //Right Bush
 
 void setup() {
   FastLED.addLeds<NEOPIXEL, A0>(leds, NUM_LEDS);
+  Serial.begin(9600);
 }
 
 
@@ -67,7 +68,33 @@ void display() {
   FastLED.show();
 }
 
+void detection_display() {
+  for (int dot = 0; dot < NUM_LEDS; dot++) {
+    leds[dot].setRGB(0, 0, 0);
+  }
+  for (int i = 0; i < 55; ++i) {
+    int rand = random(NUM_LEDS);
+    leds[rand].setRGB(255, 255, 255);
+  }
+  FastLED.show();
+}
+
+bool has_detections=false;
 void loop() {
-  display();
+  if (Serial.available() > 0) {
+    int in  = Serial.read();
+    if (in == 'D') {
+      has_detections = true;
+    } else {
+    if (in == 'N') 
+      has_detections = false;
+    }
+  }
+  if (has_detections) {
+    detection_display();
+  } else {
+    display();
+  }
+
   delay(20);
 }

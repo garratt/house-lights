@@ -16,6 +16,7 @@ void setup() {
     phases[i] = random(100);
     levels[i] = color_dir * (random(50) + 25);
   }
+  Serial.begin(9600);
 }
 
 template <int LEDS_NUM>
@@ -96,7 +97,34 @@ void display() {
   FastLED.show();
 }
 
+void detection_display() {
+  for (int dot = 0; dot < NUM_LEDS; dot++) {
+    leds[dot].setRGB(0, 0, 0);
+  }
+  for (int i = 0; i < 55; ++i) {
+    int rand = random(NUM_LEDS);
+    leds[rand].setRGB(180, 180, 180);
+  }
+  FastLED.show();
+}
+
+
+bool has_detections=false;
 void loop() {
-  display();
-  delay(100);
+  if (Serial.available() > 0) {
+    int in  = Serial.read();
+    if (in == 'D') {
+      has_detections = true;
+    } else {
+    if (in == 'N') 
+      has_detections = false;
+    }
+  }
+  if (has_detections) {
+    detection_display();
+  } else {
+    display();
+  }
+
+  delay(20);
 }

@@ -12,6 +12,7 @@ CRGB leds2[NUM_LEDS2];
 void setup() {
   FastLED.addLeds<NEOPIXEL, A0>(leds1, NUM_LEDS);
   FastLED.addLeds<NEOPIXEL, A2>(leds2, NUM_LEDS2);
+  Serial.begin(9600);
 }
 
 #define CYLON_WIDTH 20
@@ -81,7 +82,38 @@ void display() {
   FastLED.show();
 }
 
+void detection_display() {
+  for (int dot = 0; dot < NUM_LEDS; dot++) {
+    leds1[dot].setRGB(0, 0, 0);
+  }
+  for (int dot = 0; dot < NUM_LEDS2; dot++) {
+    leds2[dot].setRGB(0, 0, 0);
+  }
+  for (int i = 0; i < 55; ++i) {
+    int rand = random(NUM_LEDS);
+    leds1[rand].setRGB(255, 255, 255);
+  }
+  for (int i = 0; i < 15; ++i) {
+    leds2[random(NUM_LEDS2)].setRGB(255, 255, 255);
+  }
+  FastLED.show();
+}
+
+bool has_detections=false;
 void loop() {
-  display();
+  if (Serial.available() > 0) {
+    int in  = Serial.read();
+    if (in == 'D') {
+      has_detections = true;
+    } else {
+    if (in == 'N') 
+      has_detections = false;
+    }
+  }
+  if (has_detections) {
+    detection_display();
+  } else {
+    display();
+  }
   delay(20);
 }

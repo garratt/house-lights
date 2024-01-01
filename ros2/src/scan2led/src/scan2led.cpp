@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <memory>
+#include <string>
 #include <fcntl.h> // Contains file controls like O_RDWR
 #include <errno.h> // Error integer and strerror() function
 #include <termios.h> // Contains POSIX terminal control definitions
@@ -25,6 +26,8 @@
 #include <Eigen/Core>
 #define POINT_FIELD sensor_msgs::msg::PointField
 using std::placeholders::_1;
+
+const char* kBushNames[] = {"rbush", "cbush", "lbush", "tree"};
 
 int SetSerialParams(int serial_port) {
   // Create new termios struct, we call it 'tty' for convention
@@ -96,6 +99,18 @@ public:
     if(serial_port_ <=  0) {
       printf("Error %i opening serial port: %s\n", errno, strerror(errno));
     }
+    std::string dev_path = "/dev/house_lights/";
+    for (const char *bush_name : kBushNames) {
+      int bush = open((dev_path+bush_name).c_str(), O_RDWR);
+      if(bush <=  0) {
+        printf("Error %i opening serial port %s : %s\n", errno, (dev_path+bush_name).c_str(),
+                strerror(errno));
+      } else {
+          printf("Connected to %s\n", bush_name);
+          SetSerialParams(bush);
+          bushes_.push_back(bush);
+      }
+    }
   }
 
 private:
@@ -113,9 +128,22 @@ private:
      msg[0]='D';
      msg[1] = static_cast<uint8_t>(detections_.size());
      RCLCPP_INFO(this->get_logger(), "detections: %u  %u", detections_[0], msg[1]);
-       if (serial_port_ > 0) {
+     if (serial_port_ > 0) {
        write(serial_port_, msg, sizeof(msg));
        write(serial_port_, detections_.data(), detections_.size());
+     }
+   }
+   if (wide_detection_) {
+     n_msgs_=0;
+     for (int bush : bushes_) {
+       write(bush, "D", 1);
+     }
+   } else {
+     if (n_msgs_ < 30) {
+         n_msgs_++;
+         for (int bush : bushes_) {
+           write(bush, "N", 1);
+         }
      }
    }
   }
@@ -147,6 +175,9 @@ private:
    if (y < 5.0 && y > -1.0) {
      detections_.push_back(static_cast<uint8_t>((y + 1.0) * 16.6));
     }
+    if (y < 9.0 && y > -5.0) {
+        wide_detection_ = true;
+    }
   }
 
   void ProjectLaser(const sensor_msgs::msg::LaserScan & scan_in) {
@@ -164,6 +195,7 @@ private:
 
   unsigned int count = 0;
   detections_.clear();
+  wide_detection_ = false;
   for (size_t i = 100; i < n_pts-130; ++i) {
     // check to see if we want to keep the point
     const float range = scan_in.ranges[i];
@@ -205,8 +237,11 @@ private:
   laser_geometry::LaserProjection projector_;
 
   std::vector<uint8_t> detections_;
-  int serial_port_;
+  int serial_port_, rbush_, lbush_, tree_;
+  std::vector<int> bushes_;
+  int n_msgs_=0;
   float last_y = 0;
+  bool wide_detection_ = false;
   size_t n_pts = 417;
   float angle_min_ = -2.359030;
   float angle_max_ = 2.359030;
