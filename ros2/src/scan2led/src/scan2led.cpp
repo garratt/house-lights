@@ -136,13 +136,21 @@ private:
    if (wide_detection_) {
      n_msgs_=0;
      for (int bush : bushes_) {
-       write(bush, "D", 1);
+       int resp = write(bush, "D", 1);
+           if(resp <=  0) {
+              printf("Error %i writing to serial port : %s\n", errno, strerror(errno));
+              exit(1);
+           }
      }
    } else {
      if (n_msgs_ < 30) {
          n_msgs_++;
          for (int bush : bushes_) {
-           write(bush, "N", 1);
+           int resp = write(bush, "N", 1);
+           if(resp <=  0) {
+              printf("Error %i writing to serial port : %s\n", errno, strerror(errno));
+              exit(1);
+           }
          }
      }
    }

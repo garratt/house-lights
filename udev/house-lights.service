@@ -1,0 +1,26 @@
+[Unit]
+Description=People tracker service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+
+Environment="AMENT_PREFIX_PATH=/home/garratt/packages/house-lights/ros2/install/urg_node2:/home/garratt/packages/house-lights/ros2/install/scan2led:/opt/ros/iron"
+Environment="CMAKE_PREFIX_PATH=/home/garratt/packages/house-lights/ros2/install/urg_node2:/home/garratt/packages/house-lights/ros2/install/scan2led"
+Environment="COLCON_PREFIX_PATH=/home/garratt/packages/house-lights/ros2/install"
+Environment="LD_LIBRARY_PATH=/home/garratt/packages/house-lights/ros2/install/urg_node2/lib:/opt/ros/iron/opt/rviz_ogre_vendor/lib:/opt/ros/iron/lib/x86_64-linux-gnu:/opt/ros/iron/lib"
+Environment="PATH=/home/garratt/bin:/opt/ros/iron/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+Environment="PYTHONPATH=/opt/ros/iron/lib/python3.10/site-packages"
+Environment="ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET"
+Environment="ROS_DISTRO=iron"
+Environment="ROS_PYTHON_VERSION=3"
+Environment="ROS_VERSION=2"
+
+Type=simple
+Restart=always
+RestartSec=1
+User=garratt
+ExecStart=/opt/ros/iron/bin/ros2 launch urg_node2 urg_node2.launch.py
+
+[Install]
+WantedBy=multi-user.target
