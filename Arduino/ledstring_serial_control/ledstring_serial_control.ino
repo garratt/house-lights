@@ -28,7 +28,7 @@ void SetupStrip() {
 
 
 void setup() {
-  SetupStrip();
+ // SetupStrip();
   for (int i = 0; i < NUM_LEDS; ++i) {
     detections[i] = 0;
   }
@@ -81,6 +81,11 @@ void GreenWave(int green_pos) {
 uint8_t subcounter = 0;
 int gp = 0;
 void StandbyDisplay() {
+    for (int i = 0; i < NUM_LEDS; ++i) {
+        leds[i].setRGB(0, 0, 0);
+        leds1[i].setRGB(0, 0, 0);
+    }
+    return;
     subcounter++;
     if (subcounter == 14) {
         subcounter = 0;
@@ -118,8 +123,8 @@ void loop() {
   }
   has_detections = false;
   for (int i = 0; i < NUM_LEDS; ++i) {
-    leds[i].setRGB(10*detections[i], 10*detections[i], 10*detections[i]);
-    leds1[i].setRGB(10*detections[i], 10*detections[i], 10*detections[i]);
+    leds[i].setRGB(0*detections[i], 10*detections[i], 0*detections[i]);
+    leds1[i].setRGB(0*detections[i], 10*detections[i], 0*detections[i]);
     if (detections[i]) {
       has_detections=true;
       detections[i]--;

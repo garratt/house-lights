@@ -1,17 +1,17 @@
 #include <FastLED.h>
-#define NUM_LEDS 200
+#define NUM_LEDS 300
 CRGB leds[NUM_LEDS];
 int cursor  = 0;
 uint8_t flags[NUM_LEDS];
-//int prevcal[] = {};
-#define NUM_LEVELS 7
- int prevcal[NUM_LEVELS] = {33, 63, 98, 125, 157, 187, NUM_LEDS-1 };
+int prevcal[] = {};
+//#define NUM_LEVELS 7
+ //int prevcal[NUM_LEVELS] = {33, 63, 98, 125, 157, 187, NUM_LEDS-1 };
 
 //    int prevcal[] = {25, 48, 66, 88, 103, 118, 131, 143};
     // int prevcal[] = {15, 36, 59, 79, 97, 110, 129, 140};
     // Left side bushes: 53 100 149 197 242 277
     // Left back bushes: 8 26 49 72 91 
-
+    // cbush 17 31 49 64 82 97 115 131 
 void setup() {
    for(int dot = 0; dot < NUM_LEDS; dot++) { flags[dot] = 0; }
    for (int d : prevcal) {
@@ -19,7 +19,7 @@ void setup() {
    }
   // initialize serial communication at 9600 bits per second:
   Serial.begin(9600);
-  FastLED.addLeds<NEOPIXEL, A2>(leds, NUM_LEDS);
+  FastLED.addLeds<NEOPIXEL, A0>(leds, NUM_LEDS);
 }
 
 
