@@ -27,7 +27,7 @@
 #define POINT_FIELD sensor_msgs::msg::PointField
 using std::placeholders::_1;
 
-const char* kBushNames[] = {"rbush", "cbush", "lbush", "tree"};
+const char* kBushNames[] = {"rbush", "cbush", "lbush", "tree", "lwalk"};
 
 int SetSerialParams(int serial_port) {
   // Create new termios struct, we call it 'tty' for convention

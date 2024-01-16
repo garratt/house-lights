@@ -106,7 +106,7 @@ void display(bool debugging) {
      ClearDisplay();
      return;
    }
-   if (time_since_detect < 13000) return;
+   if (time_since_detect < 15000) return;
 
   for (int i = 0; i < NUM_DROPS; ++i) {
     Drop(phases[i], levels[i], colors[i]);

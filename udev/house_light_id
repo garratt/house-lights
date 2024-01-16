@@ -4,6 +4,7 @@ tree_id="7533432393535191B202"
 lbush_id="553303435343510151A2"
 cbush_id="75334323935351210280"
 rbush_id="55330343534351A0F061"
+lwalk_id="55330343534351A0A191"
 tracker_id="55330343534351A022E1"
 
 if [ "$1" = "$tree_id" ]; then
@@ -23,6 +24,11 @@ fi
 
 if [ "$1" = "$rbush_id" ]; then
     echo "rbush"
+    exit 0
+fi
+
+if [ "$1" = "$lwalk_id" ]; then
+    echo "lwalk"
     exit 0
 fi
 
