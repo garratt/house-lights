@@ -1,4 +1,5 @@
 #include <FastLED.h>
+#include <Creep.h>
 #define NUM_LEDS 200
 CRGB leds1[NUM_LEDS];
 #define NUM_LEVELS 7
@@ -9,39 +10,7 @@ int prevcal1[NUM_LEVELS] = {33, 63, 98, 125, 157, 187, NUM_LEDS-1 }; //Right Bus
 void setup() {
   FastLED.addLeds<NEOPIXEL, A0>(leds1, NUM_LEDS);
   Serial.begin(9600);
-}
-#define PULSE_LEN 26
-uint8_t pulse_val[PULSE_LEN] = {27, 32, 42, 52, 62, 72, 87, 102, 117, 132, 157, 172, 187,
-                             187, 172, 157, 132, 117, 102, 87, 72, 62, 52, 42, 32,27};
 
-// center bush: reverse is true
-void CreepDisplay2(int phase, int pulse, CRGB *leds, int *prevcal, int num_levels, bool reverse) {
-  if (phase < 0) return;
-  if (phase > 100 ) {
-    for (int dot = 0; dot < prevcal[num_levels-1]; dot++) {
-      leds[dot].setRGB(0,  pulse_val[pulse], 0);
-    }
-    return;
-  }
-      
-  int prev = 0;
-  for (int j = 0; j < num_levels; ++j) {
-    int dot = prevcal[j];
-    int len = dot - prev;
-    // this is normally between 0 and len, but goes off the edge by a bit
-    int clen = (phase * len) / 100; 
-    // Location of center of dot:
-    int loc  = reverse ? dot - clen : prev + clen;
-    int start = reverse ? dot : prev;
-    int dir = reverse ? -1 : 1;
-    for (int i = 0; i < clen; ++i) {
-      float intensity = (clen - i) > 10? 1.0 : (clen-i) / 10.0;
-      if (start + dir*i >= prev && start+dir*i < dot)
-        leds[start + dir*i].setRGB(0, pulse_val[pulse] * intensity, 0);
-    }
-    prev = dot;
-    reverse = !reverse;
-  }
 }
 
 int gcount = 0, gphase=0, gpulse=0;
@@ -54,34 +23,14 @@ void UpdateCount() {
    }
 }
 
-// bounce between 0 and 100
-class CyPhase {
-public:
-    void Update() {
-      phase_ += phase_dir_;
-      if (phase_ < 0 || phase_ > 100) {
-        phase_dir_ *= -1;
-        phase_ += phase_dir_*3;
-        phase_count_++;
-        if (phase_count_ % 8 == 0) phase_count_++;
-      }
-    }
-    int Phase() { return phase_; }
-    uint8_t PhaseCount() { return phase_count_; }
 
-private:
-    int phase_ = 0;
-    int phase_dir_ = 1;
-    uint8_t phase_count_ = 1;
-};
-
-CyPhase cy_phase;
+CyPhase cy_phase(CyPhase::Location::RIGHTMOST);
 #define CYLON_WIDTH 20
 #define CYLON_SCALE 13
 
 void Cylon(CRGB *leds, int *prevcal, int num_levels) {
+  if (!cy_phase.Update()) return;
   int prev = 0;
-  cy_phase.Update();
   int phase = cy_phase.Phase();
   uint8_t r = cy_phase.PhaseCount() & 0x01;
   uint8_t g = (cy_phase.PhaseCount() & 0x02) >> 1;
@@ -163,16 +112,16 @@ void display(bool debugging) {
      return;
   }
   if (time_since_detect < 29000) {
-  for (int dot = 0; dot < NUM_LEDS; dot++) {
-    leds1[dot].setRGB(0, 0, 0);
-  }
+    for (int dot = 0; dot < NUM_LEDS; dot++) {
+      leds1[dot].setRGB(0, 0, 0);
+    }
     UpdateCount();
     CreepDisplay2(gphase, gpulse, leds1, prevcal1, NUM_LEVELS, true);
   }
   if (time_since_detect > 29000) {
-     for (int i = 0; i < 2; ++i) {
-        leds1[random(NUM_LEDS)].setRGB(180, 180, 180);
-     }
+ //    for (int i = 0; i < 2; ++i) {
+  //      leds1[random(NUM_LEDS)].setRGB(180, 180, 180);
+   //  }
      Cylon(leds1, prevcal1, NUM_LEVELS);
   }
   FastLED.show();
