@@ -108,7 +108,7 @@ public:
     bool Update() {
       if (!CheckState()) return false;
       phase_ += phase_dir_;
-      if (phase_ < 0 || phase_ > 100) {
+      if (phase_ < 0 || phase_ > max_phase_) {
         phase_dir_ *= -1;
         phase_ += phase_dir_*3;
         phase_count_++;
@@ -116,7 +116,7 @@ public:
         if (location_ != LEFTMOST && phase_ < 10) {
             SignalLeft();
         }
-        if (location_ != RIGHTMOST && phase_ > 90) {
+        if (location_ != RIGHTMOST && phase_ > (max_phase_ - 10)) {
             SignalRight();
         }
       }
@@ -125,6 +125,7 @@ public:
     bool IsActive() { return state_ == ACTIVE; }
     int Phase() { return phase_; }
     uint8_t PhaseCount() { return phase_count_; }
+    void SetMaxPhase(int max_phase) {max_phase_ = max_phase; }
 
 private:
     Location location_;
@@ -132,9 +133,41 @@ private:
     int phase_ = 0;
     int phase_dir_ = 1;
     uint8_t phase_count_ = 1;
+    int max_phase_ = 100;
 
 };
 
+
+#define CYLON_WIDTH 20
+#define CYLON_SCALE 13
+
+void Cylon(int phase, uint8_t phase_count, CRGB *leds, int *prevcal, int num_levels, bool reverse) {
+  int prev = 0;
+  uint8_t r = phase_count & 0x01;
+  uint8_t g = (phase_count & 0x02) >> 1;
+  uint8_t b = (phase_count & 0x04) >> 2;
+  for (int j = 0; j < num_levels; ++j) {
+    int dot = prevcal[j];
+    int len = dot - prev;
+    // this is normally between 0 and len, but goes off the edge by a bit
+    int cloc = (phase * len) / 100; 
+    // Location of center of dot:
+    int loc  = reverse ? dot - cloc : prev + cloc;
+    // fade light out over set distance:
+    for (int i = 0; i < CYLON_WIDTH; ++i) {
+        int offset = (i*len) / 100;
+        int intensity = CYLON_SCALE * (CYLON_WIDTH - i);
+        if (loc+offset >= prev && loc+offset <= dot) {
+            leds[loc+offset].setRGB(g*intensity, r*intensity, b*intensity);
+        }
+        if (loc-offset >= prev && loc-offset <= dot) {
+            leds[loc-offset].setRGB(g*intensity, r*intensity, b*intensity);
+        }
+    }
+    prev = dot;
+    reverse = !reverse;
+  }
+}
 
 
 

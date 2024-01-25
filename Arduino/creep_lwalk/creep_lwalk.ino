@@ -1,50 +1,31 @@
 #include <FastLED.h>
+#include <Creep.h>
 #define NUM_LEDS 100
 CRGB leds1[NUM_LEDS];
 #define NUM_LEVELS 1
     // just make a line up the string:
  int prevcal1[NUM_LEVELS] = { NUM_LEDS-1};
+ int prevcal2[2] = {70, NUM_LEDS-1};
       
  unsigned long gdetect_time = 0;
+
+CyPhase cy_phase(CyPhase::Location::MIDDLE);
 
 void setup() {
   FastLED.addLeds<NEOPIXEL, A0>(leds1, NUM_LEDS);
   Serial.begin(9600);
-}
-#define PULSE_LEN 26
-uint8_t pulse_val[PULSE_LEN] = {27, 32, 42, 52, 62, 72, 87, 102, 117, 132, 157, 172, 187,
-                             187, 172, 157, 132, 117, 102, 87, 72, 62, 52, 42, 32,27};
-
-void CreepDisplay2(int phase, int pulse, CRGB *leds, int *prevcal, int num_levels, bool reverse) {
-  if (phase < 0) return;
-  if (phase > 100 ) {
-    for (int dot = 0; dot < prevcal[num_levels-1]; dot++) {
-      leds[dot].setRGB(0,  pulse_val[pulse], 0);
-    }
-    return;
-  }
-      
-  int prev = 0;
-  for (int j = 0; j < num_levels; ++j) {
-    int dot = prevcal[j];
-    int len = dot - prev;
-    // this is normally between 0 and len, but goes off the edge by a bit
-    int clen = (phase * len) / 100; 
-    // Location of center of dot:
-    int loc  = reverse ? dot - clen : prev + clen;
-    int start = reverse ? dot : prev;
-    int dir = reverse ? -1 : 1;
-    for (int i = 0; i < clen; ++i) {
-      float intensity = (clen - i) > 10? 1.0 : (clen-i) / 10.0;
-      if (start + dir*i >= prev && start+dir*i < dot)
-        leds[start + dir*i].setRGB(0, pulse_val[pulse] * intensity, 0);
-    }
-    prev = dot;
-    reverse = !reverse;
-  }
+  cy_phase.SetMaxPhase(70);
 }
 
 int gcount = 0, gphase=0, gpulse=0;
+void UpdateCount() {
+  gcount = (gcount +1) % 100;
+  if (gcount%4 == 0) gpulse++;
+  if (gcount%4 == 0) gphase++;
+   if (gpulse >= PULSE_LEN) {
+       gpulse = 0;
+   }
+}
 
 void ClearDisplay() {
   for (int dot = 0; dot < NUM_LEDS; dot++) {
@@ -62,21 +43,18 @@ void display(bool debugging) {
      return;
   }
 
-  gcount = (gcount +1) % 100;
-  if (gcount%4 == 0) gpulse++;
-  if (gcount%4 == 0) gphase++;
-   if (gpulse >= PULSE_LEN) {
-       gpulse = 0;
-   }
-  for (int dot = 0; dot < NUM_LEDS; dot++) {
-    leds1[dot].setRGB(0, 0, 0);
+  if (time_since_detect < 29000) {
+    for (int dot = 0; dot < NUM_LEDS; dot++) {
+      leds1[dot].setRGB(0, 0, 0);
+    }
+    UpdateCount();
+    CreepDisplay2(gphase, gpulse, leds1, prevcal1, NUM_LEVELS, true);
   }
-  CreepDisplay2(gphase, gpulse, leds1, prevcal1, NUM_LEVELS, true);
-
   if (time_since_detect > 29000) {
-     for (int i = 0; i < 2; ++i) {
-        leds1[random(NUM_LEDS)].setRGB(180, 180, 180);
-     }
+    if (!cy_phase.Update()) return;
+    int phase = cy_phase.Phase();
+    uint8_t phase_count = cy_phase.PhaseCount();
+    Cylon(phase, phase_count, leds1, prevcal2, NUM_LEVELS, false);
   }
   FastLED.show();
 }
@@ -107,6 +85,7 @@ void loop() {
     display(false);
   } else {
     ClearDisplay();
+    cy_phase.Reset();
   }
 
 }

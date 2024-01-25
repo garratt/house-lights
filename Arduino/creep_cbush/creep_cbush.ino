@@ -24,9 +24,8 @@ void UpdateCount() {
    }
 }
 
-CyPhase cy_phase(CyPhase::Location::LEFTMOST);
-#define CYLON_WIDTH 40
-#define CYLON_SCALE 13
+CyPhase cy_phase(CyPhase::Location::MIDDLE);
+#define VCYLON_WIDTH 40
 
 // phase shifts a triangle function.
 //        n  <-- 255 at peak, center at phase
@@ -39,11 +38,11 @@ CyPhase cy_phase(CyPhase::Location::LEFTMOST);
 // they would be at 10, 20, 30, 40, 50, 60, 70, 80
 // 
 uint8_t GetIntensity(int phase, int curr, int num_levels) {
-  int loc = CYLON_WIDTH/2 + (100-CYLON_WIDTH)/(num_levels) * curr;
+  int loc = VCYLON_WIDTH/2 + (100-VCYLON_WIDTH)/(num_levels) * curr;
  // int loc = curr*10 + 10;
   int dist = loc>=phase ? loc-phase : phase - loc;
-  if (dist > CYLON_WIDTH/2) return 0;
-  return max(min(180,(dist * 360) / CYLON_WIDTH),0); 
+  if (dist > VCYLON_WIDTH/2) return 0;
+  return max(min(180,(dist * 360) / VCYLON_WIDTH),0); 
 }
 
 // go between the levels, from 0 to 100 phase
@@ -128,6 +127,7 @@ void loop() {
     display(false);
   } else {
     ClearDisplay();
+    cy_phase.Reset();
   }
 
 }

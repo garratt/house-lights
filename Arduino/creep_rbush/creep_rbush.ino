@@ -25,40 +25,6 @@ void UpdateCount() {
 
 
 CyPhase cy_phase(CyPhase::Location::RIGHTMOST);
-#define CYLON_WIDTH 20
-#define CYLON_SCALE 13
-
-void Cylon(CRGB *leds, int *prevcal, int num_levels) {
-  if (!cy_phase.Update()) return;
-  int prev = 0;
-  int phase = cy_phase.Phase();
-  uint8_t r = cy_phase.PhaseCount() & 0x01;
-  uint8_t g = (cy_phase.PhaseCount() & 0x02) >> 1;
-  uint8_t b = (cy_phase.PhaseCount() & 0x04) >> 2;
-  bool reverse = false;
-  for (int j = 0; j < num_levels; ++j) {
-    int dot = prevcal[j];
-    int len = dot - prev;
-    // this is normally between 0 and len, but goes off the edge by a bit
-    int cloc = (phase * len) / 100; 
-    // Location of center of dot:
-    int loc  = reverse ? dot - cloc : prev + cloc;
-    // fade light out over set distance:
-    for (int i = 0; i < CYLON_WIDTH; ++i) {
-        int offset = (i*len) / 100;
-        int intensity = CYLON_SCALE * (CYLON_WIDTH - i);
-
-        if (loc+offset >= prev && loc+offset <= dot) {
-            leds[loc+offset].setRGB(g*intensity, r*intensity, b*intensity);
-        }
-        if (loc-offset >= prev && loc-offset <= dot) {
-            leds[loc-offset].setRGB(g*intensity, r*intensity, b*intensity);
-        }
-    }
-    prev = dot;
-    reverse = !reverse;
-  }
-}
 #if 0
 class Runner {
 public;
@@ -119,10 +85,10 @@ void display(bool debugging) {
     CreepDisplay2(gphase, gpulse, leds1, prevcal1, NUM_LEVELS, true);
   }
   if (time_since_detect > 29000) {
- //    for (int i = 0; i < 2; ++i) {
-  //      leds1[random(NUM_LEDS)].setRGB(180, 180, 180);
-   //  }
-     Cylon(leds1, prevcal1, NUM_LEVELS);
+    if (!cy_phase.Update()) return;
+    int phase = cy_phase.Phase();
+    uint8_t phase_count = cy_phase.PhaseCount();
+    Cylon(phase, phase_count, leds1, prevcal1, NUM_LEVELS, false);
   }
   FastLED.show();
 }
@@ -153,6 +119,7 @@ void loop() {
     display(false);
   } else {
     ClearDisplay();
+    cy_phase.Reset();
   }
 
 }

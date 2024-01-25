@@ -1,4 +1,5 @@
 #include <FastLED.h>
+#include <Creep.h>
 #define NUM_LEDS 300
 CRGB leds[NUM_LEDS];
 #define NUM_LEVELS 8
@@ -11,12 +12,15 @@ uint8_t colors[NUM_DROPS];
 int color_dir = -1;
 unsigned long gdetect_time = 0;
 
+CyPhase cy_phase(CyPhase::Location::LEFTMOST);
+
 void setup() {
   FastLED.addLeds<NEOPIXEL, A0>(leds, NUM_LEDS);
   for (int i = 0; i < NUM_DROPS; ++i) {
     phases[i] = random(100);
     levels[i] = color_dir * (random(50) + 25);
   }
+  cy_phase.SetMaxPhase(150);
   Serial.begin(9600);
 }
 
@@ -108,14 +112,23 @@ void display(bool debugging) {
    }
    if (time_since_detect < 15000) return;
 
-  for (int i = 0; i < NUM_DROPS; ++i) {
-    Drop(phases[i], levels[i], colors[i]);
-    levels[i] -= color_dir;
-    if ((color_dir * levels[i]) < -10) {
-      levels[i]=5 + (10 * color_dir);
-      phases[i] = random(100);
-      colors[i] = 1;
+  if (time_since_detect < 29000) {
+    for (int i = 0; i < NUM_DROPS; ++i) {
+      Drop(phases[i], levels[i], colors[i]);
+      levels[i] -= color_dir;
+      if ((color_dir * levels[i]) < -10) {
+        levels[i]=5 + (10 * color_dir);
+        phases[i] = random(100);
+        colors[i] = 1;
+      }
     }
+  }
+  if (time_since_detect > 29000) {
+    if (!cy_phase.Update()) return;
+    int phase = cy_phase.Phase();
+    uint8_t phase_count = cy_phase.PhaseCount();
+    if (phase >50)
+      Cylon((phase-50), phase_count, leds, prevcal, NUM_LEVELS, true);
   }
 
   FastLED.show();
@@ -155,5 +168,6 @@ void loop() {
     display(false);
   } else {
     ClearDisplay();
+    cy_phase.Reset();
   }
 }
